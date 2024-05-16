@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhD Student and Researcher</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            color: #333;
+            background: #fff;
+            overflow-x: hidden;
+            transition: all 0.5s ease;
+        }
+        .splash {
+            height: 100vh;
+            background: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+        .splash h1 {
+            font-size: 3em;
+            font-weight: 300;
+            margin: 0;
+            z-index: 1;
+            color: #333;
+        }
+        .pixels, .trail, .snakes-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .pixel, .trail-dot, .snake-dot {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: rgba(0, 0, 0, 0.1);
+        }
+        .pixel {
+            animation: pulsate 2s infinite;
+        }
+        @keyframes pulsate {
+            0%, 100% {
+                opacity: 0.1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.5);
+            }
+        }
+        .trail-dot {
+            border-radius: 50%;
+            opacity: 0.5;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .scroll-down {
+            position: absolute;
+            bottom: 20px;
+            font-size: 1em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            z-index: 1;
+            color: #333;
+            transition: opacity 0.3s ease;
+        }
+        .scroll-down:hover {
+            opacity: 0.7;
+        }
+        .language-select {
+            position: absolute;
+            bottom: 80px;
+            left: 20px;
+            z-index: 1;
+        }
+        .menu {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+            background: #f9f9f9;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            border-bottom: 1px solid #ccc;
+            transition: all 0.5s ease;
+        }
+        .menu a {
+            margin: 0 10px;
+            padding: 10px 15px;
+            font-size: 0.9em;
+            text-decoration: none;
+            color: #333;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .menu a:hover, .menu a.active {
+            background-color: #333;
+            color: #fff;
+        }
+        .main-content {
+            padding: 50px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .section h2 {
+            font-weight: 300;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .section p {
+            line-height: 1.6;
+        }
+        .floating-buttons {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 10;
+        }
+        .floating-button {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 15px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .floating-button:hover {
+            background-color: #555;
+        }
+        .floating-button-blog {
+            background-color: #0066cc;
+        }
+        .floating-button-blog:hover {
+            background-color: #004999;
+        }
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .loading-overlay.visible {
+            display: flex;
+            opacity: 1;
+        }
+        .loading-dots-container {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1001;
+        }
+        .loading-dot {
+            width: 10px;
+            height: 10px;
+            background: #333;
+            margin: 0 2px;
+            animation: loadingDots 1s infinite;
+        }
+        .loading-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .loading-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes loadingDots {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background: #f4f4f4;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            transition: right 0.3s ease;
+            z-index: 1001;
+        }
+        .sidebar.expanded {
+            right: 0;
+        }
+        .sidebar .close-btn {
+            display: block;
+            padding: 10px;
+            text-align: right;
+            cursor: pointer;
+        }
+        .sidebar .close-btn:hover {
+            color: #ff0000;
+        }
+        .sidebar .content {
+            padding: 20px;
+        }
+        .sidebar .content h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        .sidebar .content .blog-entry {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .sidebar .content .blog-entry h3 {
+            font-size: 1.2em;
+            margin: 0 0 5px 0;
+        }
+        .sidebar .content .blog-entry p {
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        /* Theme Styles */
+        .desert-theme {
+            background: #f7e9c8;
+            color: #5c3b00;
+        }
+        .desert-theme .splash {
+            background: #f7e9c8;
+        }
+        .desert-theme .menu {
+            background: #d9b38c;
+            border-bottom: 1px solid #a87c4c;
+        }
+        .desert-theme .menu a {
+            color: #5c3b00;
+            border: 1px solid #a87c4c;
+        }
+        .desert-theme .menu a:hover, .desert-theme .menu a.active {
+            background-color: #5c3b00;
+            color: #fff;
+        }
+        .desert-theme .floating-button {
+            background-color: #a87c4c;
+        }
+        .desert-theme .floating-button:hover {
+            background-color: #5c3b00;
+        }
+        .desert-theme .floating-button-blog {
+            background-color: #d98c47;
+        }
+        .desert-theme .floating-button-blog:hover {
+            background-color: #a87c4c;
+        }
+        .desert-theme .section h2 {
+            border-bottom: 1px solid #a87c4c;
+        }
+        .desert-theme .sidebar {
+            background: #f7e9c8;
+        }
+        .desert-theme .sidebar .close-btn:hover {
+            color: #a87c4c;
+        }
+
+        .black-gold-theme {
+            background: #000;
+            color: #fff;
+        }
+        .black-gold-theme .splash {
+            background: #000;
+            color: #fff;
+        }
+        .black-gold-theme .menu {
+            background: #333;
+            border-bottom: 1px solid #ffd700;
+        }
+        .black-gold-theme .menu a {
+            color: #ffd700;
+            border: 1px solid #ffd700;
+        }
+        .black-gold-theme .menu a:hover, .black-gold-theme .menu a.active {
+            background-color: #ffd700;
+            color: #000;
+        }
+        .black-gold-theme .floating-button {
+            background-color: #ffd700;
+            color: #000;
+        }
+        .black-gold-theme .floating-button:hover {
+            background-color: #e5c100;
+        }
+        .black-gold-theme .floating-button-blog {
+            background-color: #ffd700;
+            color: #000;
+        }
+        .black-gold-theme .floating-button-blog:hover {
+            background-color: #e5c100;
+        }
+        .black-gold-theme .section h2 {
+            border-bottom: 1px solid #ffd700;
+        }
+        .black-gold-theme .sidebar {
+            background: #000;
+            color: #fff;
+        }
+        .black-gold-theme .sidebar .close-btn:hover {
+            color: #ffd700;
+        }
+
+        .mcgill-theme {
+            background: #f4f4f4;
+            color: #800000;
+        }
+        .mcgill-theme .splash {
+            background: #f4f4f4;
+        }
+        .mcgill-theme .menu {
+            background: #fff;
+            border-bottom: 1px solid #800000;
+        }
+        .mcgill-theme .menu a {
+            color: #800000;
+            border: 1px solid #800000;
+        }
+        .mcgill-theme .menu a:hover, .mcgill-theme .menu a.active {
+            background-color: #800000;
+            color: #fff;
+        }
+        .mcgill-theme .floating-button {
+            background-color: #800000;
+            color: #fff;
+        }
+        .mcgill-theme .floating-button:hover {
+            background-color: #660000;
+        }
+        .mcgill-theme .floating-button-blog {
+            background-color: #800000;
+            color: #fff;
+        }
+        .mcgill-theme .floating-button-blog:hover {
+            background-color: #660000;
+        }
+        .mcgill-theme .section h2 {
+            border-bottom: 1px solid #800000;
+        }
+        .mcgill-theme .sidebar {
+            background: #f4f4f4;
+        }
+        .mcgill-theme .sidebar .close-btn:hover {
+            color: #800000;
+        }
+
+        .social-icons {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .social-icon {
+            width: 24px;
+            height: 24px;
+            filter: grayscale(100%);
+            cursor: pointer;
+            transition: filter 0.3s ease;
+        }
+        .social-icon:hover {
+            filter: grayscale(0%);
+        }
+
+        .original-theme {
+            background: #fff;
+            color: #333;
+        }
+        .original-theme .splash {
+            background: #f4f4f4;
+        }
+        .original-theme .menu {
+            background: #f9f9f9;
+            border-bottom: 1px solid #ccc;
+        }
+        .original-theme .menu a {
+            color: #333;
+            border: 1px solid #ccc;
+        }
+        .original-theme .menu a:hover, .original-theme .menu a.active {
+            background-color: #333;
+            color: #fff;
+        }
+        .original-theme .floating-button {
+            background-color: #333;
+            color: #fff;
+        }
+        .original-theme .floating-button:hover {
+            background-color: #555;
+        }
+        .original-theme .floating-button-blog {
+            background-color: #0066cc;
+        }
+        .original-theme .floating-button-blog:hover {
+            background-color: #004999;
+        }
+        .original-theme .section h2 {
+            border-bottom: 1px solid #ccc;
+        }
+        .original-theme .sidebar {
+            background: #f4f4f4;
+        }
+        .original-theme .sidebar .close-btn:hover {
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body class="original-theme">
+    <div class="splash">
+        <h1>Your Name</h1>
+        <div class="scroll-down" id="scroll-down" onclick="scrollToMenu()">Scroll Down</div>
+        <div class="language-select">
+            <select id="language" onchange="changeLanguage()">
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+            </select>
+        </div>
+        <div class="pixels" id="pixels"></div>
+        <div class="trail" id="trail"></div>
+        <div class="snakes-container" id="snakes-container"></div>
+    </div>
+    <div class="menu" id="menu">
+        <a href="#about" onclick="showSection('about')">About Me</a>
+        <a href="#research" onclick="showSection('research')">Research</a>
+        <a href="#contact" onclick="showSection('contact')">Contact</a>
+    </div>
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-dots-container" id="loading-dots-container">
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+            <div class="loading-dot"></div>
+        </div>
+    </div>
+    <div class="main-content" id="main-content">
+        <div class="section" id="about">
+            <h2>About Me</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet, nulla et dictum interdum, nisi lorem egestas odio, vitae scelerisque enim ligula venenatis dolor.</p>
+        </div>
+        <div class="section" id="research">
+            <h2>Research</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet, nulla et dictum interdum, nisi lorem egestas odio, vitae scelerisque enim ligula venenatis dolor.</p>
+        </div>
+        <div class="section" id="contact">
+            <h2>Contact</h2>
+            <p>You can reach me at <a href="mailto:youremail@example.com">youremail@example.com</a>.</p>
+        </div>
+    </div>
+    
+    <div class="floating-buttons">
+        <button class="floating-button floating-button-blog" onclick="toggleSidebar()">Personal Blog</button>
+        <button class="floating-button" onclick="downloadCV()">Download CV</button>
+        <button class="floating-button" onclick="toggleTheme()">Theme</button>
+    </div>
+    
+    <div class="social-icons">
+        <img src="https://image.flaticon.com/icons/png/512/174/174857.png" alt="LinkedIn" class="social-icon" onclick="window.open('https://www.linkedin.com')">
+        <img src="https://image.flaticon.com/icons/png/512/124/124021.png" alt="X" class="social-icon" onclick="window.open('https://www.twitter.com')">
+        <img src="https://image.flaticon.com/icons/png/512/174/174883.png" alt="YouTube" class="social-icon" onclick="window.open('https://www.youtube.com')">
+        <img src="https://image.flaticon.com/icons/png/512/174/174855.png" alt="Instagram" class="social-icon" onclick="window.open('https://www.instagram.com')">
+        <img src="https://image.flaticon.com/icons/png/512/17/17004.png" alt="Letterboxd" class="social-icon" onclick="window.open('https://www.letterboxd.com')">
+    </div>
+    
+    <div class="sidebar" id="sidebar">
+        <div class="close-btn" onclick="toggleSidebar()">&#10006;</div>
+        <div class="content">
+            <h2>Personal Blog</h2>
+            <div class="blog-entry">
+                <h3>May 16, 2024</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet, nulla et dictum interdum, nisi lorem egestas odio, vitae scelerisque enim ligula venenatis dolor.</p>
+            </div>
+            <div class="blog-entry">
+                <h3>April 30, 2024</h3>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet, nulla et dictum interdum, nisi lorem egestas odio, vitae scelerisque enim ligula venenatis dolor.</p>
+            </div>
+            <!-- Add more blog entries as needed -->
+        </div>
+    </div>
+    
+    <script>
+        function scrollToMenu() {
+            document.getElementById('menu').scrollIntoView({ behavior: 'smooth' });
+            document.getElementById('scroll-down').style.display = 'none';
+        }
+
+        function showSection(sectionId) {
+            var sections = document.querySelectorAll('.section');
+            var menuLinks = document.querySelectorAll('.menu a');
+            var loadingOverlay = document.getElementById('loading-overlay');
+            var loadingDotsContainer = document.getElementById('loading-dots-container');
+            var mainContent = document.getElementById('main-content');
+            var scrollTop = window.scrollY;
+
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+
+            menuLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+
+            document.querySelector(`.menu a[href="#${sectionId}"]`).classList.add('active');
+
+            if (scrollTop > 0) {
+                mainContent.style.opacity = '0';
+                loadingDotsContainer.style.display = 'flex';
+            } else {
+                loadingOverlay.classList.add('visible');
+            }
+
+            setTimeout(() => {
+                sections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                document.getElementById(sectionId).style.display = 'block';
+                mainContent.style.display = 'block';
+                mainContent.style.opacity = '1';
+                loadingOverlay.classList.remove('visible');
+                loadingDotsContainer.style.display = 'none';
+            }, 500);
+
+            document.getElementById('scroll-down').style.display = 'none';  // Hide "Scroll Down" text
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        window.addEventListener('scroll', function() {
+            var scrollDownText = document.getElementById('scroll-down');
+            if (window.scrollY === 0) {
+                scrollDownText.style.display = 'block';
+            } else {
+                scrollDownText.style.display = 'none';
+            }
+        });
+
+        function changeLanguage() {
+            var language = document.getElementById('language').value;
+            if (language === 'fr') {
+                document.querySelector('.splash h1').textContent = 'Votre Nom';
+                document.querySelector('.scroll-down').textContent = 'Faites défiler vers le bas';
+                document.querySelector('.menu a[href="#about"]').textContent = 'À propos de moi';
+                document.querySelector('.menu a[href="#research"]').textContent = 'Recherche';
+                document.querySelector('.menu a[href="#contact"]').textContent = 'Contact';
+                document.querySelector('#about h2').textContent = 'À propos de moi';
+                document.querySelector('#research h2').textContent = 'Recherche';
+                document.querySelector('#contact h2').textContent = 'Contact';
+                document.querySelector('#about p').textContent = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet, nulla et dictum interdum, nisi lorem egestas odio, vitae scelerisque enim ligula venenatis dolor.';
+                document.querySelector('#research p').textContent = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet, nulla et dictum interdum, nisi lorem egestas odio, vitae scelerisque enim ligula venenatis dolor.';
+                document.querySelector('#contact p').innerHTML = 'Vous pouvez me joindre à <a href="mailto:youremail@example.com">youremail@example.com</a>.';
+            } else {
+                document.querySelector('.splash h1').textContent = 'Your Name';
+                document.querySelector('.scroll-down').textContent = 'Scroll Down';
+                document.querySelector('.menu a[href="#about"]').textContent = 'About Me';
+                document.querySelector('.menu a[href="#research"]').textContent = 'Research';
+                document.querySelector('.menu a[href="#contact"]').textContent = 'Contact';
+                document.querySelector('#about h2').textContent = 'About Me';
+                document.querySelector('#research h2').textContent = 'Research';
+                document.querySelector('#contact h2').textContent = 'Contact';
+                document.querySelector('#about p').textContent = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet, nulla et dictum interdum, nisi lorem egestas odio, vitae scelerisque enim ligula venenatis dolor.';
+                document.querySelector('#research p').textContent = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus imperdiet, nulla et dictum interdum, nisi lorem egestas odio, vitae scelerisque enim ligula venenatis dolor.';
+                document.querySelector('#contact p').innerHTML = 'You can reach me at <a href="mailto:youremail@example.com">youremail@example.com</a>.';
+            }
+        }
+
+        function downloadCV() {
+            window.location.href = 'path_to_your_cv.pdf';
+        }
+
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('expanded');
+        }
+
+        function createPixels() {
+            const pixelsContainer = document.getElementById('pixels');
+            const numberOfPixels = 200;
+            for (let i = 0; i < numberOfPixels; i++) {
+                const pixel = document.createElement('div');
+                pixel.classList.add('pixel');
+                pixel.style.top = `${Math.random() * 100}%`;
+                pixel.style.left = `${Math.random() * 100}%`;
+                pixel.style.animationDelay = `${Math.random() * 2}s`;
+                pixelsContainer.appendChild(pixel);
+            }
+        }
+
+        function createTrail() {
+            const trailContainer = document.getElementById('trail');
+            const numberOfTrailDots = 10;
+            for (let i = 0; i < numberOfTrailDots; i++) {
+                const trailDot = document.createElement('div');
+                trailDot.classList.add('trail-dot');
+                trailContainer.appendChild(trailDot);
+            }
+        }
+
+        function updateTrail(e) {
+            const trailContainer = document.getElementById('trail');
+            const trailDots = trailContainer.children;
+            for (let i = trailDots.length - 1; i > 0; i--) {
+                trailDots[i].style.top = trailDots[i - 1].style.top;
+                trailDots[i].style.left = trailDots[i - 1].style.left;
+            }
+            trailDots[0].style.top = `${e.clientY}px`;
+            trailDots[0].style.left = `${e.clientX}px`;
+        }
+
+        function createSnake(snakeId, color, size, initialDirection, speed) {
+            const snakeContainer = document.getElementById('snakes-container');
+            const snake = document.createElement('div');
+            snake.classList.add('snake');
+            snake.setAttribute('id', snakeId);
+            snakeContainer.appendChild(snake);
+
+            const numberOfSnakeDots = 20;
+            for (let i = 0; i < numberOfSnakeDots; i++) {
+                const snakeDot = document.createElement('div');
+                snakeDot.classList.add('snake-dot');
+                snakeDot.style.width = `${size}px`;
+                snakeDot.style.height = `${size}px`;
+                snakeDot.style.background = color;
+                snake.appendChild(snakeDot);
+            }
+
+            let direction = initialDirection;
+            let x = Math.random() * window.innerWidth;
+            let y = Math.random() * window.innerHeight;
+
+            function moveSnake() {
+                const snakeDots = snake.children;
+
+                for (let i = snakeDots.length - 1; i > 0; i--) {
+                    snakeDots[i].style.top = snakeDots[i - 1].style.top;
+                    snakeDots[i].style.left = snakeDots[i - 1].style.left;
+                }
+
+                switch (direction) {
+                    case 'right':
+                        x += speed;
+                        if (x >= window.innerWidth - size) {
+                            x = window.innerWidth - size;
+                            direction = 'down';
+                        }
+                        break;
+                    case 'down':
+                        y += speed;
+                        if (y >= window.innerHeight - size) {
+                            y = window.innerHeight - size;
+                            direction = 'left';
+                        }
+                        break;
+                    case 'left':
+                        x -= speed;
+                        if (x <= 0) {
+                            x = 0;
+                            direction = 'up';
+                        }
+                        break;
+                    case 'up':
+                        y -= speed;
+                        if (y <= 0) {
+                            y = 0;
+                            direction = 'right';
+                        }
+                        break;
+                }
+
+                snakeDots[0].style.top = `${y}px`;
+                snakeDots[0].style.left = `${x}px`;
+
+                requestAnimationFrame(moveSnake);
+            }
+
+            requestAnimationFrame(moveSnake);
+        }
+
+        function toggleTheme() {
+            const themes = ['original-theme', 'desert-theme', 'black-gold-theme', 'mcgill-theme'];
+            const currentTheme = themes.find(theme => document.body.classList.contains(theme));
+            const currentIndex = themes.indexOf(currentTheme);
+            const nextIndex = (currentIndex + 1) % themes.length;
+            
+            document.body.classList.remove(...themes);
+            document.body.classList.add(themes[nextIndex]);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            createPixels();
+            createTrail();
+            document.querySelector('.splash').addEventListener('mousemove', updateTrail);
+
+            let snakeCount = 0;
+            const snakeColors = ['rgba(255, 165, 0, 0.7)', 'rgba(0, 255, 0, 0.7)', 'rgba(0, 0, 255, 0.7)', 'rgba(255, 0, 0, 0.7)', 'rgba(255, 0, 255, 0.7)'];
+            const snakeSizes = [5, 10, 7, 8, 6];
+            const directions = ['right', 'down', 'left', 'up'];
+
+            function addSnake() {
+                if (snakeCount < 5) {
+                    createSnake(`snake${snakeCount}`, snakeColors[snakeCount], snakeSizes[snakeCount], directions[snakeCount % 4], (Math.random() * 3) + 2);
+                    snakeCount++;
+                }
+            }
+
+            setTimeout(() => {
+                addSnake();
+                setInterval(addSnake, 10000);
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
